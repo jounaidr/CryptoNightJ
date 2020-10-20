@@ -30,8 +30,7 @@ class Keccak1600Test {
     public void Keccak1600SpeedTest(){
         for (int i = 0; i < inputData.size(); i++) {
                 //Given
-                Keccak1600 keccak1600 = new Keccak1600();
-                keccak1600.update(inputData.get(i).getBytes());
+                Keccak1600 keccak1600 = new Keccak1600(inputData.get(i));
 
                 //When
                 byte[] out = keccak1600.digestArray();

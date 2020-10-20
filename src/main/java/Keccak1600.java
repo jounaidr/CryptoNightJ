@@ -31,7 +31,7 @@ public class Keccak1600 {
     private int rateBits;
     private boolean padded;
 
-    public Keccak1600() {
+    public Keccak1600(String data) {
         for (int i = 0; i < MAX_STATE_SIZE_WORDS; ++i)
             state[i] = 0;
         rateBits = 0;
@@ -39,6 +39,8 @@ public class Keccak1600 {
         this.rateSizeBits = 1088;
         this.digestSizeBits = 512;
         padded = false;
+
+        this.update(data.getBytes());
     }
 
     @Override
@@ -46,11 +48,11 @@ public class Keccak1600 {
         return "Keccak-" + digestSizeBits;
     }
 
-    public void update(byte[] in) {
+    private void update(byte[] in) {
         update(ByteBuffer.wrap(in));
     }
 
-    public void update(ByteBuffer in) {
+    private void update(ByteBuffer in) {
         int inBytes = in.remaining();
         if (inBytes <= 0)
             return;
@@ -179,11 +181,11 @@ public class Keccak1600 {
         return array;
     }
 
-    public void digest(byte[] out, int offset, int length) {
+    private void digest(byte[] out, int offset, int length) {
         digest(ByteBuffer.wrap(out, offset, length));
     }
 
-    public void digest(ByteBuffer out) {
+    private void digest(ByteBuffer out) {
         int outBytes = out.remaining();
         if (outBytes <= 0)
             return;
