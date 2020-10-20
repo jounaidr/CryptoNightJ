@@ -1,6 +1,27 @@
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+/**
+ * @author Joseph Robert Melsha (joe.melsha@live.com)
+ * @author (MODIFICATIONS) jounaidr (https://github.com/jounaidr/JCryptoNight)
+ *
+ * Source: https://github.com/jrmelsha/keccak
+ * Created: Jun 23, 2016
+ *
+ * Copyright 2016 Joseph Robert Melsha
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 public class Keccak1600 {
     private static final int MAX_STATE_SIZE = 1600;
     private static final int MAX_STATE_SIZE_WORDS = MAX_STATE_SIZE / 64;
@@ -10,16 +31,14 @@ public class Keccak1600 {
     private int rateBits;
     private boolean padded;
 
-    public Keccak1600(int digestSizeBits) {
-        reset(digestSizeBits);
-    }
+    public Keccak1600() {
+        for (int i = 0; i < MAX_STATE_SIZE_WORDS; ++i)
+            state[i] = 0;
+        rateBits = 0;
 
-    public Keccak1600(Keccak1600 other) {
-        System.arraycopy(other.state, 0, state, 0, other.state.length);
-        rateBits = other.rateBits;
-        rateSizeBits = other.rateSizeBits;
-        digestSizeBits = other.digestSizeBits;
-        padded = other.padded;
+        this.rateSizeBits = 1088;
+        this.digestSizeBits = 512;
+        padded = false;
     }
 
     @Override
@@ -27,63 +46,8 @@ public class Keccak1600 {
         return "Keccak-" + digestSizeBits;
     }
 
-    public int rateSize() {
-        return rateSizeBits >>> 3;
-    }
-
-    public int digestSize() {
-        return digestSizeBits >>> 3;
-    }
-
-    public void reset() {
-        reset(rateSizeBits, digestSizeBits);
-    }
-
-    protected int rateSizeBitsFor(int digestSizeBits) {
-        //@formatter:off
-        switch (digestSizeBits) {
-            case 288: return 1024;
-            case 128: return 1344;
-            case 224: return 1152;
-            case 256: return 1088;
-            case 384: return  832;
-            case 512: return  1088;
-            default: throw new IllegalArgumentException("Invalid digestSizeBits: " + digestSizeBits + " ⊄ { 128, 224, 256, 288, 384, 512 }");
-        }
-        //@formatter:on
-
-        //return 1088;
-    }
-
-    public void reset(int digestSizeBits) {
-        reset(rateSizeBitsFor(digestSizeBits), digestSizeBits);
-    }
-
-    protected void reset(int rateSizebits, int digestSizeBits) {
-//        if (rateSizebits + digestSizeBits * 2 != MAX_STATE_SIZE)
-//            throw new IllegalArgumentException("Invalid rateSizebits + digestSizeBits * 2: " + rateSizebits + " + " + digestSizeBits + " * 2 != " + MAX_STATE_SIZE);
-//        if (rateSizebits <= 0 || (rateSizebits & 0x3f) > 0)
-//            throw new IllegalArgumentException("Invalid rateSizebits: " + rateSizebits);
-
-        for (int i = 0; i < MAX_STATE_SIZE_WORDS; ++i)
-            state[i] = 0;
-        rateBits = 0;
-
-        rateSizeBits = rateSizebits;
-        this.digestSizeBits = digestSizeBits;
-        padded = false;
-    }
-
-    public void update(byte in) {
-        updateBits(in & 0xff, 8);
-    }
-
     public void update(byte[] in) {
         update(ByteBuffer.wrap(in));
-    }
-
-    public void update(byte[] in, int offset, int length) {
-        update(ByteBuffer.wrap(in, offset, length));
     }
 
     public void update(ByteBuffer in) {
@@ -209,33 +173,10 @@ public class Keccak1600 {
         this.rateBits = rateBits + inBits;
     }
 
-    public ByteBuffer digest() {
-        return digest(digestSize());
-    }
-
-    public ByteBuffer digest(int outSize) {
-        return digest(outSize, false);
-    }
-
-    public ByteBuffer digest(int outSize, boolean direct) {
-        ByteBuffer buffer = direct ? ByteBuffer.allocateDirect(outSize) : ByteBuffer.allocate(outSize);
-        digest(buffer);
-        buffer.flip();
-        return buffer;
-    }
-
     public byte[] digestArray() {
-        return digestArray(digestSize());
-    }
-
-    public byte[] digestArray(int outSize) {
-        byte[] array = new byte[outSize];
-        digest(array, 0, outSize);
+        byte[] array = new byte[200];
+        digest(array, 0, 200);
         return array;
-    }
-
-    public void digest(byte[] out) {
-        digest(ByteBuffer.wrap(out));
     }
 
     public void digest(byte[] out, int offset, int length) {
