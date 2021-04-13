@@ -66,64 +66,83 @@ public class Cryptonight {
         //Memory-hard loop constantly reads and writes to scratchpad which is more effectively
         //done on the CPU as L3 cache is generally 2mb (and ASICS/GPU generally having memory bottleneck)
         for (int i = 0; i < 524288; ++i){
+            //Interoperate a scratchpad address using 'a' 16 bytes
             int scratchpad_address = toScratchpadAddress(a);
+
+            //Use scratchpad address to read 16 bytes from scratchpad,
+            //and carry out one set of 'aes_rounds' methods using 'a' as the key
             byte[] scratchpad_aes = AesUtils.aesRound(Arrays.copyOfRange(scratchPad, scratchpad_address, scratchpad_address + 16), a);
 
-            System.arraycopy(scratchpad_aes,0, scratchPad, scratchpad_address, 16);
-
+            //Xor 'b' and the previously calculated 'scratchpad_aes' 16 bytes,
+            //and write result to scratchpad at the 'scratchpad_address',
+            //before assigning 'scratchpad_aes' to 'b'
             byte[] xorB = ByteUtils.xor(b, scratchpad_aes);
-
             System.arraycopy(xorB, 0, scratchPad, scratchpad_address, 16);
-
             b = scratchpad_aes;
 
+            //Interoperate a scratchpad address using 'b' 16 bytes
             scratchpad_address = toScratchpadAddress(b);
 
-            byte[] mul = f8byteMul(b, Arrays.copyOfRange(scratchPad, scratchpad_address, scratchpad_address + 8));
+            //Calculate '8byte_mul' of 'b' and 8 bytes of the scratchpad from 'scratchpad_address',
+            //and calculate 'f8byteAdd' on the result of the previous calculation and 'a'.
+            //Assign the result to 'a'
+            a = f8byteAdd(a, f8byteMul(b, Arrays.copyOfRange(scratchPad, scratchpad_address, scratchpad_address + 8)));
 
-            a = f8byteAdd(a, mul);
-
+            //Finally, calculate the xor of 'a' and 16 bytes of scratchpad from 'scratchpad_address'
+            //write the 16 bytes of 'a' (before xor') to the scratchpad at 'scratchpad_address',
+            //before assigning the previsouy calculated xor to 'a' to complete the iteration
             byte[] xorA = ByteUtils.xor(a, Arrays.copyOfRange(scratchPad, scratchpad_address, scratchpad_address + 16));
-
             System.arraycopy(a, 0, scratchPad, scratchpad_address, 16);
-
             a = xorA;
         }
 
-        byte[] key_2 = new byte[32];
-        System.arraycopy(finalState, 32, key_2, 0, 32);
+        //*******************************************************************
+        //                         RESULTS CALCULATION
+        //*******************************************************************
 
-        byte[] expandedKeys_2 = AesUtils.expandRoundKeys(key_2,10);
-        byte[][] keys_2 = new byte[10][16];
+        //Generate 10 AES round keys from bytes 32 to 63 (32 bytes) in the same manner as was
+        //done during scratchpad initialisation
+        expandedKeys = AesUtils.expandRoundKeys(Arrays.copyOfRange(finalState, 32, 64),10);
         for (int i = 0; i < 10; ++i){
-            System.arraycopy(expandedKeys_2, 16 * i, keys_2[i], 0, 16);
+            System.arraycopy(expandedKeys, 16 * i, keys[i], 0, 16);
         }
 
-        byte[] keccakXorAes = new byte[128];
-        System.arraycopy(finalState, 64, keccakXorAes, 0, 128);
+        //Read 128 byes from bytes 64 to 191 of the scratchpad which will be used to
+        //consecutively xor with each 128 byte section of the scratchpad
+        byte[] keccakXorAes = Arrays.copyOfRange(finalState, 64, 192);
 
         for(int i = 0; i < 16384; i++) {
+            //xor the current 128 'keccakXorAes' bytes from the final state with 128 bytes of the,
+            //scratchpad from address 'i' (16384 denotes the number of 128 byte blocks in the scratchpad)
             keccakXorAes = ByteUtils.xor(keccakXorAes, Arrays.copyOfRange(scratchPad, i * 128, (i * 128) + 128));
 
-            byte[][] blocks_2 = new byte[8][16];
+            //Split the 128 bytes into 8 16 byte blocks
             for (int j = 0; j < 8; ++j){
-                System.arraycopy(keccakXorAes, 16 * j, blocks_2[j], 0, 16);
+                System.arraycopy(keccakXorAes, 16 * j, blocks[j], 0, 16);
             }
 
+            //Carry out a full cycle of 'aes_rounds' methods with the 10 AES keys expanded
+            //previously, and write the encrypted blocks back into the 128 byte 'keccakXorAes'
+            //to be used in the next iteration
             for (int j = 0; j < 8; ++j){
                 for (int k = 0; k < 10; ++k) {
-                    blocks_2[j] = AesUtils.aesRound(blocks_2[j], keys_2[k]);
+                    blocks[j] = AesUtils.aesRound(blocks[j], keys[k]);
                 }
-                System.arraycopy(blocks_2[j], 0, keccakXorAes, j*16, 16);
+                System.arraycopy(blocks[j], 0, keccakXorAes, j*16, 16);
             }
         }
 
+        //Write the modified 128 bytes back into the final state at bytes 64 to 191
         System.arraycopy(keccakXorAes, 0, finalState, 64, 128);
 
+        //Pass the final state through the 'Keccak-f' function that carries out a keccak
+        //permutation, and calculate the result hash to be used from the first 2 bits of
+        //the modified state
         byte[] modifiedState = KeccakUtils.permutation(finalState);
-
         int lastHashType = (modifiedState[0] & 0xFF) & 3;
 
+        //Hash the modified state with the chosen hash function which produces the
+        //cryptonight hash assigned to the global 'out' byte array.
         switch(lastHashType) {
             case 0: // BLAKE-256
                 BLAKE256 blake256 = new BLAKE256();
