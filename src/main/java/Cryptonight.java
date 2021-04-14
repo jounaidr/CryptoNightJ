@@ -176,6 +176,7 @@ public class Cryptonight {
     }
 
     private byte[] f8byteMul(byte[] lea, byte[] leb) {
+        //TODO: OPTIMISE THIS FUNCTION
         // The 8byte_mul function, however, uses only the first 8 bytes of each
         // argument, which are interpreted as unsigned 64-bit little-endian
         // integers and multiplied together. The result is converted into 16
@@ -220,6 +221,7 @@ public class Cryptonight {
     }
 
     private byte[] f8byteAdd(byte[] a, byte[] b) {
+        //TODO: OPTIMISE THIS FUNCTION
         // Where, the 8byte_add function represents each of the arguments as a
         // pair of 64-bit little-endian values and adds them together,
         // component-wise, modulo 2^64. The result is converted back into 16
