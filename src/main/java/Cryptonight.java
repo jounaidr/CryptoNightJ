@@ -43,9 +43,7 @@ public class Cryptonight {
                 for (int k = 0; k < 10; ++k) {
                     blocks[j] = AesUtils.aesRound(blocks[j], keys[k]);
                 }
-            }
-            //Write the encrypted blocks to the 128 bytes in the scratch pad from position i
-            for (int j = 0; j < 8; ++j){
+                //Write the encrypted blocks to the 128 bytes in the scratch pad from position i
                 System.arraycopy(blocks[j], 0, scratchPad, i*128 + j*16, 16);
             }
         }
@@ -67,32 +65,32 @@ public class Cryptonight {
         //done on the CPU as L3 cache is generally 2mb (and ASICS/GPU generally having memory bottleneck)
         for (int i = 0; i < 524288; ++i){
             //Interoperate a scratchpad address using 'a' 16 bytes
-            int scratchpad_address = toScratchpadAddress(a);
+            int scratchpadAddress = toScratchpadAddress(a);
 
             //Use scratchpad address to read 16 bytes from scratchpad,
             //and carry out one set of 'aes_rounds' methods using 'a' as the key
-            byte[] scratchpad_aes = AesUtils.aesRound(Arrays.copyOfRange(scratchPad, scratchpad_address, scratchpad_address + 16), a);
+            byte[] scratchpad_aes = AesUtils.aesRound(Arrays.copyOfRange(scratchPad, scratchpadAddress, scratchpadAddress + 16), a);
 
             //Xor 'b' and the previously calculated 'scratchpad_aes' 16 bytes,
-            //and write result to scratchpad at the 'scratchpad_address',
+            //and write result to scratchpad at the 'scratchpadAddress',
             //before assigning 'scratchpad_aes' to 'b'
             byte[] xorB = ByteUtils.xor(b, scratchpad_aes);
-            System.arraycopy(xorB, 0, scratchPad, scratchpad_address, 16);
+            System.arraycopy(xorB, 0, scratchPad, scratchpadAddress, 16);
             b = scratchpad_aes;
 
             //Interoperate a scratchpad address using 'b' 16 bytes
-            scratchpad_address = toScratchpadAddress(b);
+            scratchpadAddress = toScratchpadAddress(b);
 
-            //Calculate '8byte_mul' of 'b' and 8 bytes of the scratchpad from 'scratchpad_address',
+            //Calculate '8byte_mul' of 'b' and 8 bytes of the scratchpad from 'scratchpadAddress',
             //and calculate 'f8byteAdd' on the result of the previous calculation and 'a'.
             //Assign the result to 'a'
-            a = f8byteAdd(a, f8byteMul(b, Arrays.copyOfRange(scratchPad, scratchpad_address, scratchpad_address + 8)));
+            a = f8byteAdd(a, f8byteMul(b, Arrays.copyOfRange(scratchPad, scratchpadAddress, scratchpadAddress + 8)));
 
-            //Finally, calculate the xor of 'a' and 16 bytes of scratchpad from 'scratchpad_address'
-            //write the 16 bytes of 'a' (before xor') to the scratchpad at 'scratchpad_address',
+            //Finally, calculate the xor of 'a' and 16 bytes of scratchpad from 'scratchpadAddress'
+            //write the 16 bytes of 'a' (before xor') to the scratchpad at 'scratchpadAddress',
             //before assigning the previsouy calculated xor to 'a' to complete the iteration
-            byte[] xorA = ByteUtils.xor(a, Arrays.copyOfRange(scratchPad, scratchpad_address, scratchpad_address + 16));
-            System.arraycopy(a, 0, scratchPad, scratchpad_address, 16);
+            byte[] xorA = ByteUtils.xor(a, Arrays.copyOfRange(scratchPad, scratchpadAddress, scratchpadAddress + 16));
+            System.arraycopy(a, 0, scratchPad, scratchpadAddress, 16);
             a = xorA;
         }
 

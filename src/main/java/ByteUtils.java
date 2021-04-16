@@ -12,12 +12,12 @@ public class ByteUtils {
         return currentPosition;
     }
 
-    public static byte[] xor(byte[] input1, byte[] input2) {
-        byte[] output = new byte[Math.min(input1.length, input2.length)];
-        for (int i = 0; i < output.length; i++) {
-            output[i] = (byte) ((input1[i] ^ input2[i]) & 0xFF);
+    public static byte[] xor(byte[] in1, byte[] in2) {
+        byte[] out = new byte[Math.min(in1.length, in2.length)];
+        for (int i = 0; i < out.length; i++) {
+            out[i] = (byte) ((in1[i] ^ in2[i]) & 0xFF);
         }
-        return output;
+        return out;
     }
 
     public static byte finiteMultiplication(byte v1, byte v2) {
