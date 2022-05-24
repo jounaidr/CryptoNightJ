@@ -9,19 +9,19 @@ The CryptoNight algorithm consists of three sections: scratchpad initialisation,
 **Scratchpad Initialisation**
 
 <p align="center" width="100%">
-    <img width="50%" src="https://github.com/jounaidr/CryptoNightJ/blob/main/docs/resources/scratchpad_initializatin.png"> 
+    <img width="60%" src="https://github.com/jounaidr/CryptoNightJ/blob/main/docs/resources/scratchpad_initializatin.png"> 
 </p>
 
 **Memory-hard Loop**
 
 <p align="center" width="100%">
-    <img width="50%" src="https://github.com/jounaidr/CryptoNightJ/blob/main/docs/resources/mem_hard_loop_trans.png"> 
+    <img width="60%" src="https://github.com/jounaidr/CryptoNightJ/blob/main/docs/resources/mem_hard_loop_trans.png"> 
 </p>
 
 **Results Calculation**
 
 <p align="center" width="100%">
-    <img width="50%" src="https://github.com/jounaidr/CryptoNightJ/blob/main/docs/resources/results_calc.png"> 
+    <img width="60%" src="https://github.com/jounaidr/CryptoNightJ/blob/main/docs/resources/results_calc.png"> 
 </p>
 
 ### Dependencies
