@@ -6,13 +6,17 @@ The algorithms implementation can be found in: [Cryptonight.java](https://github
 ### Algorithm Overview
 The CryptoNight algorithm consists of three sections: scratchpad initialisation, memory-hard loop and results calculation. The following three diagrams (based on the Cryptonote Standard 2013) provide an overview on how the algorithm functions. See the [Monero docs](https://monerodocs.org/proof-of-work/cryptonight/) or [JRC writeup](https://github.com/jounaidr/reports-archive/blob/main/DISS_REPORT.pdf) for more info.
 
+
 **scratchpad initialisation**
+
 ![scratchpad_initializatin](https://github.com/jounaidr/CryptoNightJ/blob/main/docs/resources/scratchpad_initializatin.png)
 
 **memory-hard loop**
+
 ![mem_hard_loop_trans](https://github.com/jounaidr/CryptoNightJ/blob/main/docs/resources/mem_hard_loop_trans.png)
 
 **results calculation**
+
 ![results_calc](https://github.com/jounaidr/CryptoNightJ/blob/main/docs/resources/results_calc.png)
 
 ### Dependencies
