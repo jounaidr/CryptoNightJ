@@ -9,7 +9,9 @@ The CryptoNight algorithm consists of three sections: scratchpad initialisation,
 
 **Scratchpad Initialisation**
 
-![scratchpad_initializatin](https://github.com/jounaidr/CryptoNightJ/blob/main/docs/resources/scratchpad_initializatin.png)
+<p align="center" width="100%">
+    <img width="33%" src="https://github.com/jounaidr/CryptoNightJ/blob/main/docs/resources/scratchpad_initializatin.png"> 
+</p>
 
 **Memory-hard Loop**
 
